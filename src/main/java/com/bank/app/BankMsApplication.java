@@ -8,7 +8,9 @@ import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 
+import com.bank.app.models.Atm;
 import com.bank.app.models.Bank;
+import com.bank.app.repository.IAtmRepository;
 import com.bank.app.repository.IBankRepository;
 
 import reactor.core.publisher.Flux;
@@ -21,6 +23,9 @@ public class BankMsApplication implements CommandLineRunner {
 
 	@Autowired
 	private IBankRepository bankRepository;
+	
+	@Autowired
+	private IAtmRepository atmRepo;
 
 	public static void main(String[] args) {
 		SpringApplication.run(BankMsApplication.class, args);
@@ -28,6 +33,23 @@ public class BankMsApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
+		bankRepository.findByCodeBank(100).flatMap(bank -> {
+			return atmRepo.save(new Atm(bank, 100, "Magdalena 1032"));
+		}).flatMap(atm -> {
+			return atmRepo.save(new Atm(atm.getBank(), 101, "Javier Prado 1030"));
+		}).subscribe();
+		
+		bankRepository.findByCodeBank(101).flatMap(bank -> {
+			return atmRepo.save(new Atm(bank, 102, "Jiron de la union 423"));
+		}).flatMap(atm -> {
+			return atmRepo.save(new Atm(atm.getBank(), 103, "Javier Prado 1030"));
+		}).subscribe();
+		
+		bankRepository.findByCodeBank(102).flatMap(bank -> {
+			return atmRepo.save(new Atm(bank, 104, "Av arequipa 112"));
+		}).flatMap(atm -> {
+			return atmRepo.save(new Atm(atm.getBank(), 105, "Av Brasil 1314"));
+		}).subscribe();
 		/*
 		template.dropCollection(Bank.class).subscribe();
 
